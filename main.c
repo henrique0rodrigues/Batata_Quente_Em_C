@@ -3,6 +3,7 @@
 #include <time.h>
 #include <stdbool.h>
 #include <conio.h>
+#include <windows.h>
 
 typedef struct elem
 {
@@ -11,6 +12,44 @@ typedef struct elem
     struct elem *link;
 }celula;
 
+void exibir_tela(int batata_pos, int modo_jogo) {
+    system("cls");
+    printf("\n   ====================================================\n");
+    printf("                   BATATA QUENTE EM C  !!                \n");
+    printf("   ====================================================\n\n");
+
+    // Linha da Batata
+    printf("    ");
+    for (int i = 0; i <= 50; i++) {
+        if (i == batata_pos) {
+            printf("O"); // Caractere que representa a Batata
+        } else {
+            printf(" ");
+        }
+    }
+    printf("\n");
+
+    // Linha dos Jogadores
+    printf("    ");
+    for (int i = 0; i <= 50; i++) {
+        if (i == 5) { 
+            printf("(J1)"); 
+            i += 3; 
+        } else if (i == 25) { 
+            printf("(J2)"); 
+            i += 3; 
+        } else if (i == 45 && modo_jogo == 2) { 
+            printf("(J3)"); 
+            i += 3; 
+        } else {
+            printf(" ");
+        }
+    }
+    
+    printf("\n\n   ====================================================\n");
+    printf("   Pressione ESPACO para passar a batata!\n");
+    printf("   ====================================================\n");
+}
 
 int main()
 {
@@ -20,8 +59,8 @@ int main()
     int menu, sorteado;
 
     srand(time(NULL));
-    int tempo_aleatorio = (rand() % 6) + 6;
-    time_t tempo_inicio = time(NULL);
+    int tempo_aleatorio = (rand() % 4) + 7;
+    time_t tempo_inicio;
     time_t tempo_atual;
 
     do
@@ -71,31 +110,44 @@ int main()
             }
             break;
     }
-    printf("\n--- O JOGO COMECOU!! ---\n");
-    printf("A batata esta como jogador %d!\n", atual->id);
-    printf("Para passar a batata pressione ESPACO  o quanto antes!!!\n");
+    // Define a posição inicial da batata
+    int pos_batata = (atual->id == 1) ? 6 : (atual->id == 2 ? 26 : 46);
+    
+    exibir_tela(pos_batata, menu);
+    printf("\nA batata comecou com o jogador %d! Preparem-se...\n", atual->id);
+    system("pause");
 
-        do
-        {
-            tempo_atual = time(NULL);
+    // O tempo começa a contar aqui
+    tempo_inicio = time(NULL);
 
-            if (_kbhit()) {
-            // Lê a tecla pressionada sem precisar apertar Enter
+    do
+    {
+        tempo_atual = time(NULL);
+
+        if (_kbhit()) {
             char tecla = _getch(); 
 
-            // Verifica se a tecla pressionada foi o espaço
             if (tecla == ' ') {
+                // 1. Passa a batata na lista circular imediatamente
                 atual->hand = false;
                 atual = atual->link;
                 atual->hand = true;
+
+                // 2. Calcula a nova posição da batata com base no novo jogador atual
+                pos_batata = (atual->id == 1) ? 6 : (atual->id == 2 ? 26 : 46);
                 
-                printf("A batata foi passada!! Agora esta com o jogador %d\n", atual->id);
+                // 3. Atualiza a tela instantaneamente
+                exibir_tela(pos_batata, menu);
             }
         }
-        } while (difftime(tempo_atual, tempo_inicio) < tempo_aleatorio);
+    } while (difftime(tempo_atual, tempo_inicio) < tempo_aleatorio);
     
-    printf("\n FIM DE JOGO! O tempo acabou!!\n");
-    printf("O jogador %d estava com a batata na mao e perdeu!!\n", atual->id);
+    // Garante que a tela final mostre a batata exatamente com quem perdeu
+    pos_batata = (atual->id == 1) ? 6 : (atual->id == 2 ? 26 : 46);
+    exibir_tela(pos_batata, menu);
+
+    printf("\n FIM DE JOGO!!!!\n");
+    printf(" O jogador %d ficou com a batata na mao e PERDEU!!\n\n", atual->id);
 
     return 0;
 }
